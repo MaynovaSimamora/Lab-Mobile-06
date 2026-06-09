@@ -6,7 +6,7 @@
         <item name="colorOnPrimary">@color/white</item>
         <item name="colorSecondary">@color/batik_gold</item>
         <item name="colorSecondaryVariant">@color/batik_gold_dark</item>
-        <item name="colorOnSecondary">@color/text_dark</item>
+        <item name="colorOnSecondary">@color/on_gold</item>
         <item name="android:colorBackground">@color/cream</item>
         <item name="colorSurface">@color/cream_card</item>
         <item name="colorOnSurface">@color/text_dark</item>

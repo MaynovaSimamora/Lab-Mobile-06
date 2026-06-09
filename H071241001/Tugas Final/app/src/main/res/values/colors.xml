@@ -1,19 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Batik Coklat — LIGHT -->
-    <color name="batik_brown">#5D4037</color>
-    <color name="batik_brown_dark">#3E2723</color>
-    <color name="batik_brown_light">#8D6E63</color>
+    <!-- ===== Batik Modern — Light ===== -->
+    <color name="batik_brown">#4E342E</color>
+    <color name="batik_brown_dark">#2E1F18</color>
+    <color name="batik_brown_light">#8A7763</color>
     <color name="batik_gold">#C9972B</color>
     <color name="batik_gold_dark">#A87C1F</color>
-    <color name="cream">#FBF3E7</color>
+    <color name="on_gold">#2A1C0E</color>
+    <color name="cream">#F7F3EE</color>
     <color name="cream_card">#FFFFFF</color>
-    <color name="text_dark">#2E2018</color>
+    <color name="surface_soft">#F5F1EC</color>
+    <color name="border_soft">#EFE7DA</color>
+    <color name="text_dark">#2C2C2A</color>
     <color name="white">#FFFFFF</color>
+    <color name="sale_red">#A32D2D</color>
+    <color name="rating_amber">#EF9F27</color>
 
-    <!-- DARK -->
-    <color name="night_bg">#241813</color>
-    <color name="night_surface">#3A2A20</color>
+    <!-- ===== Batik Modern — Dark ===== -->
+    <color name="night_bg">#1F150E</color>
+    <color name="night_surface">#2E2018</color>
+    <color name="night_surface_soft">#33241A</color>
+    <color name="night_border">#3A2A1C</color>
     <color name="night_brown">#A1887F</color>
     <color name="night_gold">#E0B84C</color>
+    <color name="night_text">#F3EAD8</color>
+    <color name="night_muted">#A08A6A</color>
 </resources>
