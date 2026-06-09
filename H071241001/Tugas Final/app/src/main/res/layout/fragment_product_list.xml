@@ -6,10 +6,61 @@
     android:orientation="vertical"
     android:background="?android:attr/colorBackground">
 
-    <com.google.android.material.textfield.TextInputLayout
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="12dp"
+        app:cardCornerRadius="18dp"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="@color/batik_brown">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.1"
+                    android:text="KOLEKSI PILIHAN"
+                    android:textColor="@color/batik_gold"
+                    android:textSize="11sp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="Batik &amp; Aksesoris Terbaik"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Temukan warisan Nusantara di sini"
+                    android:textColor="@color/cream"
+                    android:textSize="11sp" />
+            </LinearLayout>
+            <ImageView
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:src="@drawable/ic_store"
+                app:tint="@color/batik_gold"
+                android:contentDescription="@string/app_name" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginBottom="10dp"
         app:boxStrokeColor="@color/batik_gold"
         app:startIconDrawable="@android:drawable/ic_menu_search"
         android:hint="@string/hint_search">
@@ -45,7 +96,6 @@
             android:id="@+id/swipe_refresh"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_products"
                 android:layout_width="match_parent"
@@ -70,13 +120,11 @@
             android:orientation="vertical"
             android:padding="24dp"
             android:visibility="gone">
-
             <ImageView
                 android:layout_width="96dp"
                 android:layout_height="96dp"
                 android:src="@drawable/ic_cloud_off"
                 android:contentDescription="@string/error_message" />
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -85,7 +133,6 @@
                 android:text="@string/error_message"
                 android:textColor="?attr/colorOnSurface"
                 android:textSize="16sp" />
-
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_refresh"
                 android:layout_width="wrap_content"

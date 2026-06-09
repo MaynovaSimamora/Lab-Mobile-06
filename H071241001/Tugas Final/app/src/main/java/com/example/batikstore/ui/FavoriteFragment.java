@@ -8,18 +8,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.batikstore.DetailActivity;
 import com.example.batikstore.R;
 import com.example.batikstore.adapter.ProductAdapter;
 import com.example.batikstore.db.AppDatabase;
-import com.example.batikstore.db.ProductDao;
+import com.example.batikstore.db.CartDao;
+import com.example.batikstore.model.CartItem;
 import com.example.batikstore.model.Product;
 
 import java.util.List;
@@ -48,15 +50,19 @@ public class FavoriteFragment extends Fragment {
         RecyclerView recyclerView = view.findViewById(R.id.recycler_favorite);
         tvEmpty = view.findViewById(R.id.tv_empty);
 
-        adapter = new ProductAdapter(this::openDetail);
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        adapter = new ProductAdapter(new ProductAdapter.OnProductListener() {
+            @Override public void onItemClick(Product product) { openDetail(product); }
+            @Override public void onAddToCart(Product product) { addToCart(product); }
+            @Override public void onToggleFavorite(Product product) { unfavorite(product); }
+        });
+        recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
         recyclerView.setAdapter(adapter);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        loadFavorites(); // refresh setiap kali fragment tampil
+        loadFavorites();
     }
 
     private void openDetail(Product product) {
@@ -65,10 +71,36 @@ public class FavoriteFragment extends Fragment {
         startActivity(intent);
     }
 
+    private void addToCart(Product p) {
+        executor.execute(() -> {
+            CartDao dao = AppDatabase.getInstance(requireContext()).cartDao();
+            CartItem existing = dao.getById(p.getId());
+            if (existing != null) {
+                dao.updateQty(p.getId(), existing.getQuantity() + 1);
+            } else {
+                CartItem item = new CartItem();
+                item.setProductId(p.getId());
+                item.setTitle(p.getTitle());
+                item.setPrice(p.getPrice());
+                item.setImage(p.getImage());
+                item.setQuantity(1);
+                dao.insert(item);
+            }
+            mainHandler.post(() ->
+                    Toast.makeText(requireContext(), "Ditambahkan ke keranjang", Toast.LENGTH_SHORT).show());
+        });
+    }
+
+    private void unfavorite(Product p) {
+        executor.execute(() -> {
+            AppDatabase.getInstance(requireContext()).productDao().setFavorite(p.getId(), p.isFavorite());
+            mainHandler.post(this::loadFavorites);
+        });
+    }
+
     private void loadFavorites() {
         executor.execute(() -> {
-            ProductDao dao = AppDatabase.getInstance(requireContext()).productDao();
-            List<Product> favorites = dao.getFavorites();
+            List<Product> favorites = AppDatabase.getInstance(requireContext()).productDao().getFavorites();
             mainHandler.post(() -> {
                 adapter.setItems(favorites);
                 tvEmpty.setVisibility(favorites.isEmpty() ? View.VISIBLE : View.GONE);

@@ -20,14 +20,16 @@ import java.util.Locale;
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHolder> {
 
-    public interface OnItemClickListener {
+    public interface OnProductListener {
         void onItemClick(Product product);
+        void onAddToCart(Product product);
+        void onToggleFavorite(Product product);
     }
 
     private final List<Product> items = new ArrayList<>();
-    private final OnItemClickListener listener;
+    private final OnProductListener listener;
 
-    public ProductAdapter(OnItemClickListener listener) {
+    public ProductAdapter(OnProductListener listener) {
         this.listener = listener;
     }
 
@@ -40,45 +42,60 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_product, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_product, parent, false);
         return new ViewHolder(v);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder h, int position) {
         Product p = items.get(position);
-        holder.title.setText(p.getTitle());
-        holder.category.setText(p.getCategory());
-        holder.price.setText(PriceUtil.formatRupiah(p.getPrice()));
-
+        h.title.setText(p.getTitle());
+        h.category.setText(p.getCategory() != null ? p.getCategory().toUpperCase(Locale.getDefault()) : "");
+        h.price.setText(PriceUtil.formatRupiah(p.getPrice()));
         if (p.getRating() != null) {
-            holder.rating.setText(String.format(Locale.US, "★ %.1f (%d)",
-                    p.getRating().getRate(), p.getRating().getCount()));
+            h.rating.setText(String.format(Locale.US, "★ %.1f", p.getRating().getRate()));
         } else {
-            holder.rating.setText("★ -");
+            h.rating.setText("★ -");
         }
+        Glide.with(h.itemView.getContext()).load(p.getImage())
+                .centerCrop().placeholder(R.color.cream).error(R.drawable.ic_store).into(h.image);
 
-        Glide.with(holder.itemView.getContext())
-                .load(p.getImage())
-                .centerInside()
-                .into(holder.image);
+        updateHeart(h, p.isFavorite());
 
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) listener.onItemClick(p);
+        h.itemView.setOnClickListener(v -> { if (listener != null) listener.onItemClick(p); });
+        h.btnAdd.setOnClickListener(v -> { if (listener != null) listener.onAddToCart(p); });
+        h.btnFav.setOnClickListener(v -> {
+            int pos = h.getAdapterPosition();
+            if (pos == RecyclerView.NO_POSITION) return;
+            Product item = items.get(pos);
+            item.setFavorite(!item.isFavorite());
+            updateHeart(h, item.isFavorite());
+            if (listener != null) listener.onToggleFavorite(item);
         });
+    }
+
+    private void updateHeart(ViewHolder h, boolean fav) {
+        if (fav) {
+            h.btnFav.setImageResource(R.drawable.ic_favorite);
+            h.btnFav.setColorFilter(h.itemView.getContext().getColor(R.color.sale_red));
+        } else {
+            h.btnFav.setImageResource(R.drawable.ic_favorite_border);
+            h.btnFav.setColorFilter(h.itemView.getContext().getColor(R.color.batik_brown_light));
+        }
     }
 
     @Override
     public int getItemCount() { return items.size(); }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView image;
+        ImageView image, btnFav, btnAdd;
         TextView title, category, price, rating;
 
         ViewHolder(@NonNull View v) {
             super(v);
             image = v.findViewById(R.id.img_product);
+            btnFav = v.findViewById(R.id.btn_favorite_card);
+            btnAdd = v.findViewById(R.id.btn_add_cart);
             title = v.findViewById(R.id.tv_title);
             category = v.findViewById(R.id.tv_category);
             price = v.findViewById(R.id.tv_price);

@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,7 +27,9 @@ import com.example.batikstore.DetailActivity;
 import com.example.batikstore.R;
 import com.example.batikstore.adapter.ProductAdapter;
 import com.example.batikstore.db.AppDatabase;
+import com.example.batikstore.db.CartDao;
 import com.example.batikstore.db.ProductDao;
+import com.example.batikstore.model.CartItem;
 import com.example.batikstore.model.Product;
 import com.example.batikstore.network.ApiClient;
 import com.google.android.material.button.MaterialButton;
@@ -82,7 +85,11 @@ public class ProductListFragment extends Fragment {
         MaterialButton btnRefresh = view.findViewById(R.id.btn_refresh);
         EditText etSearch = view.findViewById(R.id.et_search);
 
-        adapter = new ProductAdapter(this::openDetail);
+        adapter = new ProductAdapter(new ProductAdapter.OnProductListener() {
+            @Override public void onItemClick(Product product) { openDetail(product); }
+            @Override public void onAddToCart(Product product) { addToCart(product); }
+            @Override public void onToggleFavorite(Product product) { persistFavorite(product); }
+        });
         recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
         recyclerView.setAdapter(adapter);
 
@@ -111,6 +118,31 @@ public class ProductListFragment extends Fragment {
 
         showLoading(true);
         loadProducts();
+    }
+
+    private void addToCart(Product p) {
+        executor.execute(() -> {
+            CartDao dao = AppDatabase.getInstance(requireContext()).cartDao();
+            CartItem existing = dao.getById(p.getId());
+            if (existing != null) {
+                dao.updateQty(p.getId(), existing.getQuantity() + 1);
+            } else {
+                CartItem item = new CartItem();
+                item.setProductId(p.getId());
+                item.setTitle(p.getTitle());
+                item.setPrice(p.getPrice());
+                item.setImage(p.getImage());
+                item.setQuantity(1);
+                dao.insert(item);
+            }
+            mainHandler.post(() ->
+                    Toast.makeText(requireContext(), "Ditambahkan ke keranjang", Toast.LENGTH_SHORT).show());
+        });
+    }
+
+    private void persistFavorite(Product p) {
+        executor.execute(() ->
+                AppDatabase.getInstance(requireContext()).productDao().setFavorite(p.getId(), p.isFavorite()));
     }
 
     private void buildCategoryChips() {
@@ -173,7 +205,7 @@ public class ProductListFragment extends Fragment {
         executor.execute(() -> {
             ProductDao dao = AppDatabase.getInstance(requireContext()).productDao();
             Set<Integer> favIds = new HashSet<>(dao.getFavoriteIds());
-            dao.deleteAll(); // hapus data lama supaya tidak tercampur
+            dao.deleteAll();
             for (Product p : apiProducts) if (favIds.contains(p.getId())) p.setFavorite(true);
             dao.insertAll(apiProducts);
             List<Product> fromDb = dao.getAll();
